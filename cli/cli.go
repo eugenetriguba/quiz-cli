@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 )
 
+// Output and certain methods
+// are specified here so we can
+// replace them when needed to
+// ease testing.
 var out io.Writer = os.Stdout
 var errOut io.Writer = os.Stderr
 var osExit = os.Exit
