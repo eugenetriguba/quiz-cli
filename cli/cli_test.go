@@ -114,9 +114,9 @@ func TestReadFileRetrievesContents(t *testing.T) {
 // However, we still want to ensure our code is working as it
 // should in the event there is one.
 //
-// This test and TestReadFileRaisesOsExitOnError may be able
+// This test and TestReadFileRaisesOsExitOnError might be able
 // to be merged into one test to reduce the boilerplate code.
-func TestAbsolutePathRaisesOsExitOnError(t *testing.T) {
+func TestAbsolutePathCallsOsExitOnError(t *testing.T) {
 	// Save current functions and restore at the end
 	oldOsExit := osExit
 	oldFilepathAbs := filepathAbs
@@ -143,7 +143,7 @@ func TestAbsolutePathRaisesOsExitOnError(t *testing.T) {
 	}
 }
 
-func TestReadFileRaisesOsExitOnError(t *testing.T) {
+func TestReadFileCallsOsExitOnError(t *testing.T) {
 	// Save current functions and restore at the end
 	oldOsExit := osExit
 	defer func() { osExit = oldOsExit }()
