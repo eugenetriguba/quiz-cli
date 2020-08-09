@@ -87,7 +87,7 @@ func TestOsExitMethod(t *testing.T) {
 
 func TestRunReturnsZero(t *testing.T) {
 	expectedReturnValue := 0
-	actualReturnValue := Run([]string{"./quiz"})
+	actualReturnValue := Run("quiz", []string{})
 
 	if expectedReturnValue != actualReturnValue {
 		t.Errorf("expected %d, got %d", expectedReturnValue, actualReturnValue)

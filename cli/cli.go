@@ -20,7 +20,7 @@ var filepathAbs = filepath.Abs
 var defaultCsvPath string = "../problems.csv"
 
 // Run runs our CLI.
-func Run(args []string) int {
+func Run(progname string, args []string) int {
 	return 0
 }
 
