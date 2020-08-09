@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -24,14 +25,27 @@ func Run(args []string) int {
 }
 
 func readFile(path string) []byte {
-	return []byte("")
+	contents, err := ioutil.ReadFile(path)
+
+	if err != nil {
+		fmt.Fprintf(
+			errOut,
+			"could not retrieve the file contents of '%s' because '%s'\n",
+			path, err)
+		osExit(1)
+	}
+
+	return contents
 }
 
 func getAbsolutePath(path string) string {
-	absoluteCsvPath, err := filepathAbs(path)
+	absolutePath, err := filepathAbs(path)
 	if err != nil {
-		fmt.Fprintf(errOut, "could not retrieve the absolute path to %s", path)
+		fmt.Fprintf(
+			errOut,
+			"could not retrieve the absolute path to '%s' because '%s'\n",
+			path, err)
 		osExit(1)
 	}
-	return absoluteCsvPath
+	return absolutePath
 }

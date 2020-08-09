@@ -10,14 +10,22 @@ import (
 	"testing"
 )
 
-func createTempFile(content []byte, t *testing.T) (*os.File, string) {
-	tmpdir := os.TempDir()
-	tmpfile, err := ioutil.TempFile(tmpdir, "temp-quiz-test-file")
+func createTempFile(content []byte, t *testing.T) *os.File {
+	tmpfile, err := ioutil.TempFile("", "temp-quiz-test-file")
 	if err != nil {
-		t.Errorf("could not create temp file %s", tmpfile.Name())
+		t.Errorf(
+			"could not create temp file '%s' because '%v'",
+			tmpfile.Name(), err)
 	}
 
-	return tmpfile, filepath.Join(tmpdir, tmpfile.Name())
+	err = ioutil.WriteFile(tmpfile.Name(), content, 0600)
+	if err != nil {
+		t.Errorf(
+			"could not write '%v' to temp file '%s'",
+			content, err)
+	}
+
+	return tmpfile
 }
 
 func cleanTempFile(f *os.File, t *testing.T) {
@@ -77,12 +85,37 @@ func TestOsExitMethod(t *testing.T) {
 	}
 }
 
+func TestRunReturnsZero(t *testing.T) {
+	expectedReturnValue := 0
+	actualReturnValue := Run([]string{"./quiz"})
+
+	if expectedReturnValue != actualReturnValue {
+		t.Errorf("expected %d, got %d", expectedReturnValue, actualReturnValue)
+	}
+}
+
+func TestReadFileRetrievesContents(t *testing.T) {
+	expectedContents := []byte("test contents")
+
+	tmpfile := createTempFile(expectedContents, t)
+	defer cleanTempFile(tmpfile, t)
+
+	actualContents := readFile(tmpfile.Name())
+
+	if bytes.Compare(expectedContents, actualContents) != 0 {
+		t.Errorf("expected %v, got %v", expectedContents, actualContents)
+	}
+}
+
 // We have to replace the real os.Exit and filepath.Abs
 // calls here since testing os.Exit is tricky to do and
 // filepath.Abs seems to be hard to get to return an error.
 //
 // However, we still want to ensure our code is working as it
 // should in the event there is one.
+//
+// This test and TestReadFileRaisesOsExitOnError may be able
+// to be merged into one test to reduce the boilerplate code.
 func TestAbsolutePathRaisesOsExitOnError(t *testing.T) {
 	// Save current functions and restore at the end
 	oldOsExit := osExit
@@ -110,24 +143,21 @@ func TestAbsolutePathRaisesOsExitOnError(t *testing.T) {
 	}
 }
 
-func TestRunReturnsZero(t *testing.T) {
-	expectedReturnValue := 0
-	actualReturnValue := Run([]string{"./quiz"})
+func TestReadFileRaisesOsExitOnError(t *testing.T) {
+	// Save current functions and restore at the end
+	oldOsExit := osExit
+	defer func() { osExit = oldOsExit }()
 
-	if expectedReturnValue != actualReturnValue {
-		t.Errorf("expected %d, got %d", expectedReturnValue, actualReturnValue)
+	expectedExitCode := 1
+	var actualExitCode int
+	testExit := func(code int) {
+		actualExitCode = code
 	}
-}
 
-func TestReadFileRetrievesContents(t *testing.T) {
-	expectedContents := []byte("test contents")
+	osExit = testExit
+	readFile(".")
 
-	tmpfile, tmpPath := createTempFile(expectedContents, t)
-	defer cleanTempFile(tmpfile, t)
-
-	actualContents := readFile(tmpPath)
-
-	if bytes.Compare(expectedContents, actualContents) != 0 {
-
+	if expectedExitCode != actualExitCode {
+		t.Errorf("expected exit code %d, got %d", expectedExitCode, actualExitCode)
 	}
 }
