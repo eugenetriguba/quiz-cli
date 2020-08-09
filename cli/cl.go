@@ -54,7 +54,7 @@ func (cl *CommandLine) Parse(progname string, args []string) (output string, err
 		return "", err
 	}
 
-	cl.csvPath, err = getAbsolutePath(cl.csvPath)
+	cl.csvPath, err = filepathAbs(cl.csvPath)
 	if err != nil {
 		return "", err
 	}

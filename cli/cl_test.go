@@ -36,7 +36,7 @@ func TestCommandLineParseHasDefaultsForFlags(t *testing.T) {
 	progname := "quiz"
 	args := []string{}
 
-	expectedCsvPath, err := getAbsolutePath(defaultCsvPath)
+	expectedCsvPath, err := filepathAbs(defaultCsvPath)
 	if err != nil {
 		t.Errorf(
 			"could not get absolute path of '%s' because '%s'",
@@ -61,7 +61,7 @@ func TestCommandLineCanParseFlags(t *testing.T) {
 	progname := "quiz"
 	args := []string{"-csv", csvInput, "-limit", "15s"}
 
-	expectedCsvPath, err := getAbsolutePath(csvInput)
+	expectedCsvPath, err := filepathAbs(csvInput)
 	if err != nil {
 		t.Errorf(
 			"could not get absolute path of '%s' because '%s'",
