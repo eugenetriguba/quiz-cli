@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bytes"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -9,13 +10,14 @@ import (
 	"testing"
 )
 
-func createTempFile(content []byte, t *testing.T) *os.File {
-	tmpfile, err := ioutil.TempFile(os.TempDir(), "temp-quiz-test-file")
+func createTempFile(content []byte, t *testing.T) (*os.File, string) {
+	tmpdir := os.TempDir()
+	tmpfile, err := ioutil.TempFile(tmpdir, "temp-quiz-test-file")
 	if err != nil {
 		t.Errorf("could not create temp file %s", tmpfile.Name())
 	}
 
-	return tmpfile
+	return tmpfile, filepath.Join(tmpdir, tmpfile.Name())
 }
 
 func cleanTempFile(f *os.File, t *testing.T) {
@@ -120,15 +122,12 @@ func TestRunReturnsZero(t *testing.T) {
 func TestReadFileRetrievesContents(t *testing.T) {
 	expectedContents := []byte("test contents")
 
-	tmpfile := createTempFile(expectedContents, t)
+	tmpfile, tmpPath := createTempFile(expectedContents, t)
 	defer cleanTempFile(tmpfile, t)
 
-	fileinfo, err := tmpfile.Stat();
-	if err != nil {
-		t.Errorf("could not retrieve file info on %s", tmpfile.Name())
+	actualContents := readFile(tmpPath)
+
+	if bytes.Compare(expectedContents, actualContents) != 0 {
+
 	}
-
-	t.Errorf("%v", fileinfo)
-
-	// actualContents := readFile(fileinfo)
 }
