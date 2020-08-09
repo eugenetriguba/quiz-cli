@@ -27,6 +27,10 @@ func NewDefaultQuiz() *Quiz {
 // "question", answer
 // "question", answer
 //
+//  Or:
+//  question, header
+//  "1+1", "2"
+//
 //  and so on.
 func (q *Quiz) Parse(csvFile string) error {
 	r := csv.NewReader(strings.NewReader(csvFile))
