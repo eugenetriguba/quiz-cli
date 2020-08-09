@@ -30,7 +30,7 @@ func readFile(path string) []byte {
 func getAbsolutePath(path string) string {
 	absoluteCsvPath, err := filepathAbs(path)
 	if err != nil {
-		fmt.Print(errOut, "could not retrieve the absolute path to %s", path)
+		fmt.Fprintf(errOut, "could not retrieve the absolute path to %s", path)
 		osExit(1)
 	}
 	return absoluteCsvPath
