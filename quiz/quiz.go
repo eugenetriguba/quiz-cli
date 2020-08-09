@@ -2,6 +2,7 @@ package quiz
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"strings"
 )
@@ -37,6 +38,9 @@ func (q *Quiz) Parse(csvFile string) error {
 		}
 		if err != nil {
 			return err
+		}
+		if len(record) != 2 {
+			return fmt.Errorf("each csv line should have two items")
 		}
 
 		q.Problems = append(q.Problems, NewProblem(record[0], record[1]))

@@ -47,7 +47,18 @@ func TestQuizReadFillsProblems(t *testing.T) {
 }
 
 func TestQuizReadReturnsErrOnInvalidCsvFormat(t *testing.T) {
-	csvFile := "a,b,c\nabc,abc"
+	csvFile := "a,b\nabc,abc,abc"
+
+	q := NewDefaultQuiz()
+	err := q.Parse(csvFile)
+
+	if err == nil {
+		t.Errorf("expected error to not be nil, got nil instead")
+	}
+}
+
+func TestQuizReadReturnsErrOnCsvLineWithoutTwoItems(t *testing.T) {
+	csvFile := "abc,abc,abc"
 
 	q := NewDefaultQuiz()
 	err := q.Parse(csvFile)
