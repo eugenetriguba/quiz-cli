@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/eugenetriguba/quiz/cli"
+	"github.com/eugenetriguba/quiz-cli/cli"
 )
 
 func main() {
