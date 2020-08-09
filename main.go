@@ -7,5 +7,8 @@ import (
 )
 
 func main() {
-	os.Exit(cli.Run(os.Args[0], os.Args[1:]))
+	cl := cli.NewCommandLine()
+	cl.Parse(os.Args[0], os.Args[1:])
+
+	os.Exit(cl.Run())
 }
