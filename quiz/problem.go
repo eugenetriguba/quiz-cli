@@ -28,5 +28,8 @@ func NewProblem(question string, answer string) *Problem {
 
 // IsCorrect checks if the given input is the correct answer.
 func (p *Problem) IsCorrect(answer string) bool {
+	answer = strings.TrimSpace(answer)
+	answer = strings.TrimRight(answer, "\n")
+
 	return strings.Compare(p.Answer, answer) == 0
 }

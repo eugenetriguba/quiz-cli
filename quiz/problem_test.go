@@ -48,6 +48,11 @@ func TestProblemCanCheckWhetherTheAnswerIsCorrect(t *testing.T) {
 			Input:          "2",
 			ExpectedResult: true,
 		},
+		{
+			QuizProblem:    NewProblem("1+1", "2"),
+			Input:          "  2  \n",
+			ExpectedResult: true,
+		},
 	} {
 		actualResult := test.QuizProblem.IsCorrect(test.Input)
 		if actualResult != test.ExpectedResult {
