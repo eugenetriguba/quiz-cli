@@ -1,7 +1,13 @@
 package quiz
 
 import (
+	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
 	"testing"
+
+	"github.com/eugenetriguba/quiz-cli/internal/testutil"
 )
 
 // testEqProblems uses the t to fail the test if a and b are not
@@ -29,6 +35,14 @@ func TestNewDefaultQuiz(t *testing.T) {
 	expectedProblems := []*Problem{}
 
 	q := NewDefaultQuiz()
+
+	testEqProblems(q.Problems, expectedProblems, t)
+}
+
+func TestNewQuiz(t *testing.T) {
+	expectedProblems := []*Problem{NewProblem("1+1", "2")}
+
+	q := NewQuiz(expectedProblems)
 
 	testEqProblems(q.Problems, expectedProblems, t)
 }
@@ -65,5 +79,39 @@ func TestQuizReadReturnsErrOnCsvLineWithoutTwoItems(t *testing.T) {
 
 	if err == nil {
 		t.Errorf("expected error to not be nil, got nil instead")
+	}
+}
+
+func TestQuizPlay(t *testing.T) {
+	oldStdin := os.Stdin
+	oldStdout := os.Stdout
+	defer func() { os.Stdin = oldStdin; os.Stdout = oldStdout }()
+
+	inFile := testutil.CreateTempFile("2\n", t)
+	outFile := testutil.CreateTempFile("", t)
+	defer testutil.CleanTempFile(inFile, t)
+	defer testutil.CleanTempFile(outFile, t)
+	os.Stdin = inFile
+	os.Stdout = outFile
+
+	q := NewQuiz([]*Problem{NewProblem("1+1", "2")})
+	err := q.Play()
+
+	if err != nil {
+		t.Errorf("expected no error, got '%v'\n", err)
+	}
+
+	if 1 != q.Correct {
+		t.Errorf("expected %d correct problems, got %d\n", 1, q.Correct)
+	}
+
+	outFileContents, err := ioutil.ReadFile(outFile.Name())
+	if err != nil {
+		t.Errorf("could not retrieve outfile contents because '%v'\n", err)
+	}
+
+	lastNum := fmt.Sprintf("#%d", len(q.Problems))
+	if !strings.Contains(string(outFileContents), lastNum) {
+		t.Errorf("expected '%s' in output, got '%s'\n", lastNum, string(outFileContents))
 	}
 }
