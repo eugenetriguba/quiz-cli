@@ -1,6 +1,6 @@
 # Quiz CLI
 
-Quiz CLI is a toy program for created for practice and getting
+Quiz CLI is a toy program created for practice and getting
 more familiar with various Go standard libraries.
 
 It reads in problems from the `problems.csv` file. That file also
@@ -25,8 +25,12 @@ Usage of ./quiz-cli:
         Set the question time limit (default 30s)
 ```
 
-Otherwise, we can just run the program with `./quiz-cli`.
+The `default` for `-csv` is generated automatically based on wherever the `quiz-cli`
+package is. It'll also automatically convert your `-csv` argument to an absolute
+path for you based on the current directory you're in, so there is no need to specify
+a full absolute path like that default shows.
 
+To run the program, we can run `./quiz-cli`.
 ```
 Problem #1: 5+5 = 10
 Problem #2: 7+3 = 10
