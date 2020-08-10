@@ -2,18 +2,84 @@ package cli
 
 import (
 	"errors"
+	"io"
+	"os"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/eugenetriguba/quiz-cli/internal/testutil"
 )
 
-func TestCommandLineRunReturnsZero(t *testing.T) {
-	expectedReturnValue := 0
+func TestCommandLineRunExitCodesAndErrOut(t *testing.T) {
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+
+	for _, test := range []struct {
+		QuizFile            string
+		InputFile           string
+		ExpectedReturnValue int
+		ExpectedErrorOutput string
+	}{
+		{
+			QuizFile:            "1+1,2\n",
+			InputFile:           "2\n",
+			ExpectedReturnValue: 0,
+			ExpectedErrorOutput: "",
+		},
+		{
+			QuizFile:            io.EOF.Error(),
+			InputFile:           "",
+			ExpectedReturnValue: 1,
+			ExpectedErrorOutput: "could not parse the csv file",
+		},
+		{
+			QuizFile:            "1,2",
+			InputFile:           "2",
+			ExpectedReturnValue: 1,
+			ExpectedErrorOutput: "an error occurred while playing the quiz",
+		},
+	} {
+		quizFile := testutil.CreateTempFile(test.QuizFile, t)
+		inputFile := testutil.CreateTempFile(test.InputFile, t)
+		defer testutil.CleanTempFile(quizFile, t)
+		defer testutil.CleanTempFile(inputFile, t)
+
+		os.Stdin = inputFile
+		cl := NewCommandLine()
+		cl.Parse("quiz", []string{"-csv", quizFile.Name()})
+		errOut, actualReturnValue := testutil.CaptureOutputAndReturnValue(cl.Run, os.Stderr)
+
+		if test.ExpectedReturnValue != actualReturnValue {
+			t.Errorf("expected return value %d, got %d",
+				test.ExpectedReturnValue, actualReturnValue)
+		}
+
+		if !strings.Contains(test.ExpectedErrorOutput, errOut) {
+			t.Errorf(
+				"expected '%s' in stderr output, got '%s' for output\n",
+				test.ExpectedErrorOutput, errOut)
+		}
+	}
+}
+
+func TestCommandLineRunBadCsvPath(t *testing.T) {
+	expectedReturnValue := 1
+	expectedOutput := "could not read the csv file at"
+
 	cl := NewCommandLine()
-	cl.Parse("quiz", []string{})
-	actualReturnValue := cl.Run()
+	cl.Parse("quiz", []string{"-csv", "should-not-exist!"})
+	errOut, actualReturnValue := testutil.CaptureOutputAndReturnValue(cl.Run, os.Stderr)
 
 	if expectedReturnValue != actualReturnValue {
-		t.Errorf("expected %d, got %d", expectedReturnValue, actualReturnValue)
+		t.Errorf("expected return value %d, got %d",
+			expectedReturnValue, actualReturnValue)
+	}
+
+	if !strings.Contains(expectedOutput, errOut) {
+		t.Errorf(
+			"expected '%s' in stderr output, got '%s' for output\n",
+			expectedOutput, errOut)
 	}
 }
 
@@ -88,15 +154,39 @@ func TestCommandLineCanParseFlags(t *testing.T) {
 
 func TestCommandLineHasErrOnInvalidParse(t *testing.T) {
 	cl := NewCommandLine()
-	_, err := cl.Parse("quiz", []string{"-nonexistentflag", "10"})
+	output, err := cl.Parse("quiz", []string{"-nonexistentflag", "10"})
+
+	if !strings.Contains(output, "flag provided but not defined: -nonexistentflag") {
+		t.Errorf("expected '', got '%s'", output)
+	}
 
 	if err == nil {
 		t.Errorf("expected err to not be nil on invalid parse, got %v", err)
 	}
 }
 
+func TestCommandLineShowsHelpPageWithFlag(t *testing.T) {
+	helpErrText := "flag: help requested"
+	csvFlag := "-csv string"
+	limitFlag := "-limit duration"
+
+	cl := NewCommandLine()
+	output, err := cl.Parse("quiz", []string{"-h"})
+
+	if !strings.Contains(err.Error(), helpErrText) {
+		t.Errorf("expected '%s' on -h flag, got '%v'\n", helpErrText, err)
+	}
+
+	if !strings.Contains(output, csvFlag) {
+		t.Errorf("expected '%s', got '%s'", csvFlag, output)
+	}
+
+	if !strings.Contains(output, limitFlag) {
+		t.Errorf("expected '%s', got '%s'", limitFlag, output)
+	}
+}
+
 func TestCommandLineParseHasErrOnInvalidPath(t *testing.T) {
-	// Save current function and restore at the end
 	oldFilepathAbs := filepathAbs
 	defer func() { filepathAbs = oldFilepathAbs }()
 	testAbs := func(path string) (string, error) {
@@ -105,7 +195,11 @@ func TestCommandLineParseHasErrOnInvalidPath(t *testing.T) {
 
 	filepathAbs = testAbs
 	cl := NewCommandLine()
-	_, err := cl.Parse("quiz", []string{})
+	output, err := cl.Parse("quiz", []string{})
+
+	if output != "" {
+		t.Errorf("expected '', got '%s'", output)
+	}
 
 	if err == nil {
 		t.Errorf("expected error to not be nil, got nil")

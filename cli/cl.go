@@ -3,8 +3,17 @@ package cli
 import (
 	"bytes"
 	"flag"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"time"
+
+	"github.com/eugenetriguba/quiz-cli/quiz"
 )
+
+// Specified here to ease testing.
+var filepathAbs = filepath.Abs
 
 // The CommandLine contains the flags that
 // the cli uses and is able to parse them.
@@ -20,10 +29,6 @@ type CommandLine struct {
 // and the timeLimit is set to 0.
 func NewCommandLine() *CommandLine {
 	var cl CommandLine
-
-	cl.csvPath = ""
-	cl.timeLimit = 0
-
 	return &cl
 }
 
@@ -51,18 +56,50 @@ func (cl *CommandLine) Parse(progname string, args []string) (output string, err
 
 	err = flagset.Parse(args)
 	if err != nil {
-		return "", err
+		return buf.String(), err
 	}
 
 	cl.csvPath, err = filepathAbs(cl.csvPath)
 	if err != nil {
-		return "", err
+		return buf.String(), err
 	}
 
-	return "", nil
+	return buf.String(), nil
 }
 
-// Run runs our CLI.
+// Run runs our CLI to play the quiz.
+//
+// The exit code that the app should use is returned.
+// 1 if we could not read the csv file; 0 otherwise.
 func (cl *CommandLine) Run() int {
+	q := quiz.NewDefaultQuiz()
+
+	contents, err := ioutil.ReadFile(cl.csvPath)
+	if err != nil {
+		fmt.Fprintf(
+			os.Stderr,
+			"could not read the csv file at '%s' because '%v'\n",
+			cl.csvPath, err)
+		return 1
+	}
+
+	err = q.Parse(string(contents))
+	if err != nil {
+		fmt.Fprintf(
+			os.Stderr,
+			"could not parse the csv file contents because '%v'\n",
+			err)
+		return 1
+	}
+
+	err = q.Play()
+	if err != nil {
+		fmt.Fprintf(
+			os.Stderr,
+			"an error occurred while playing the quiz: '%v'\n",
+			err)
+		return 1
+	}
+
 	return 0
 }
