@@ -53,7 +53,7 @@ func (cl *CommandLine) Parse(progname string, args []string) (output string, err
 	flagset.StringVar(
 		&cl.csvPath, "csv", defaultCsvPath, "Set problems file")
 	flagset.DurationVar(
-		&cl.timeLimit, "limit", defaultTimeLimit, "Set the question time limit")
+		&cl.timeLimit, "limit", defaultTimeLimit, "Set the quiz time limit")
 	flagset.BoolVar(
 		&cl.shuffle, "shuffle", false, "Shuffle the problems presented")
 
@@ -99,7 +99,7 @@ func (cl *CommandLine) Run() int {
 		q.Shuffle()
 	}
 
-	err = q.Play()
+	err = q.Start(cl.timeLimit)
 	if err != nil {
 		fmt.Fprintf(
 			os.Stderr,

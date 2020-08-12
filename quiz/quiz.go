@@ -68,6 +68,7 @@ func (q *Quiz) Parse(csvFile string) error {
 	return nil
 }
 
+// Shuffle psuedorandomly shuffles our quiz problems
 func (q *Quiz) Shuffle() {
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(q.Problems), func(i, j int) {
@@ -75,19 +76,33 @@ func (q *Quiz) Shuffle() {
 	})
 }
 
-// Play starts up the quiz.
-func (q *Quiz) Play() error {
+// Start starts up the quiz.
+func (q *Quiz) Start(timeLimit time.Duration) error {
+	timer := time.NewTimer(timeLimit)
+	answerCh := make(chan string)
+	errCh := make(chan error)
+	go func() {
+		reader := bufio.NewReader(os.Stdin)
+		answer, err := reader.ReadString('\n')
+		if err != nil {
+			errCh <- err
+		}
+		answerCh <- answer
+	}()
+
+timerExpired:
 	for i := 0; i < len(q.Problems); i++ {
 		fmt.Fprintf(os.Stdout, "Problem #%d: %s = ", i+1, q.Problems[i].Question)
 
-		reader := bufio.NewReader(os.Stdin)
-		text, err := reader.ReadString('\n')
-		if err != nil {
+		select {
+		case <-timer.C:
+			break timerExpired
+		case answer := <-answerCh:
+			if q.Problems[i].IsCorrect(answer) {
+				q.Correct++
+			}
+		case err := <-errCh:
 			return err
-		}
-
-		if q.Problems[i].IsCorrect(text) {
-			q.Correct++
 		}
 	}
 

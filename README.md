@@ -7,9 +7,8 @@ It reads in problems from the `problems.csv` file. That file also
 contains the answers. Each problem is prompted to the user
 at the CLI and they may answer them, until all problems have been
 answered. Then, a score total is shown to the user. The user has by
-default a 30 second time limit to answer each question, otherwise the
-program will exit. This time limit and the csv file to retrieve problems
-from may both be customized with a command line flag.
+default a 30 second time limit complete the quiz, otherwise the program
+will exit with whatever score they have gotten thus far.
 
 ## Usage
 
@@ -22,7 +21,7 @@ Usage of ./quiz-cli:
   -csv string
         Set problems file (default "/home/eugene/Code/quiz-cli/problems.csv")
   -limit duration
-        Set the question time limit (default 30s)
+        Set the quiz time limit (default 30s)
   -shuffle
         Shuffle the problems presented
 ```
@@ -49,4 +48,11 @@ Problem #12: 2+4 = 6
 Problem #13: 5+2 = 7
 
 You scored 13 out of 13.
+```
+
+Or with a time limit and shuffled with `./quiz-cli -limit 1s -shuffle`.
+```
+Problem #1: 1+1 = 
+
+You scored 0 out of 13.
 ```

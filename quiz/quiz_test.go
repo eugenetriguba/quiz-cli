@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/eugenetriguba/quiz-cli/internal/testutil"
 )
@@ -78,7 +79,7 @@ func TestQuizPlay(t *testing.T) {
 	os.Stdout = outFile
 
 	q := NewQuiz([]*Problem{NewProblem("1+1", "2")})
-	err := q.Play()
+	err := q.Start(time.Second * 30)
 
 	if err != nil {
 		t.Errorf("expected no error, got '%v'\n", err)
