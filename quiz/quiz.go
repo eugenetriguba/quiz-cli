@@ -96,6 +96,7 @@ timerExpired:
 
 		select {
 		case <-timer.C:
+			fmt.Println()
 			break timerExpired
 		case answer := <-answerCh:
 			if q.Problems[i].IsCorrect(answer) {
