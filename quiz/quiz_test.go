@@ -100,16 +100,17 @@ func TestQuizPlay(t *testing.T) {
 }
 
 func TestQuizShuffle(t *testing.T) {
-	input := []*Problem{}
-	for i := 0; i < 50; i++ {
-		input = append(input, NewProblem(string(i), "n/a"))
+	length := 50
+	input := make([]*Problem, length)
+	for i := 0; i < length; i++ {
+		input[i] = NewProblem(string(i), "n/a")
 	}
 
 	q := NewQuiz(input)
 	q.Shuffle()
 	shuffled := false
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < length; i++ {
 		if strings.Compare(q.Problems[i].Question, string(i)) != 0 {
 			shuffled = true
 			break
@@ -117,6 +118,8 @@ func TestQuizShuffle(t *testing.T) {
 	}
 
 	if !shuffled {
-		t.Errorf("Shuffle() of 50 problems were all in the correct order, expected to be shuffled\n")
+		t.Errorf(
+			"Shuffle() of %d problems were all in the correct order, "+
+				"expected to be shuffled\n", length)
 	}
 }
