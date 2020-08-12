@@ -20,6 +20,7 @@ var filepathAbs = filepath.Abs
 type CommandLine struct {
 	csvPath   string
 	timeLimit time.Duration
+	shuffle   bool
 }
 
 // NewCommandLine creates a new
@@ -53,6 +54,8 @@ func (cl *CommandLine) Parse(progname string, args []string) (output string, err
 		&cl.csvPath, "csv", defaultCsvPath, "Set problems file")
 	flagset.DurationVar(
 		&cl.timeLimit, "limit", defaultTimeLimit, "Set the question time limit")
+	flagset.BoolVar(
+		&cl.shuffle, "shuffle", false, "Shuffle the problems presented")
 
 	err = flagset.Parse(args)
 	if err != nil {
@@ -90,6 +93,10 @@ func (cl *CommandLine) Run() int {
 			"could not parse the csv file contents because '%v'\n",
 			err)
 		return 1
+	}
+
+	if cl.shuffle {
+		q.Shuffle()
 	}
 
 	err = q.Play()

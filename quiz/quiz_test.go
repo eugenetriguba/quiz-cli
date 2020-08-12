@@ -31,54 +31,37 @@ func testEqProblems(a []*Problem, b []*Problem, t *testing.T) {
 	}
 }
 
-func TestNewDefaultQuiz(t *testing.T) {
-	expectedProblems := []*Problem{}
-
-	q := NewDefaultQuiz()
-
-	testEqProblems(q.Problems, expectedProblems, t)
-}
-
-func TestNewQuiz(t *testing.T) {
-	expectedProblems := []*Problem{NewProblem("1+1", "2")}
-
-	q := NewQuiz(expectedProblems)
-
-	testEqProblems(q.Problems, expectedProblems, t)
-}
-
 func TestQuizReadFillsProblems(t *testing.T) {
-	csvFile := "1+1,2\n5+5,10"
-	expectedProblems := []*Problem{NewProblem("1+1", "2"), NewProblem("5+5", "10")}
-
 	q := NewDefaultQuiz()
-	err := q.Parse(csvFile)
-	if err != nil {
-		t.Errorf("could not read '%s' because '%v'\n", csvFile, err)
-	}
+	input := "1+1,2\n5+5,10"
+	want := []*Problem{NewProblem("1+1", "2"), NewProblem("5+5", "10")}
 
-	testEqProblems(q.Problems, expectedProblems, t)
+	err := q.Parse(input)
+	if err != nil {
+		t.Errorf("could not read '%s' because '%v'\n", input, err)
+	}
+	got := q.Problems
+
+	testEqProblems(want, got, t)
 }
 
 func TestQuizReadReturnsErrOnInvalidCsvFormat(t *testing.T) {
-	csvFile := "a,b\nabc,abc,abc"
-
+	input := "a,b\nabc,abc,abc"
 	q := NewDefaultQuiz()
-	err := q.Parse(csvFile)
+	err := q.Parse(input)
 
 	if err == nil {
-		t.Errorf("expected error to not be nil, got nil instead")
+		t.Errorf("expected error on Parse(%q), got nil instead", input)
 	}
 }
 
 func TestQuizReadReturnsErrOnCsvLineWithoutTwoItems(t *testing.T) {
-	csvFile := "abc,abc,abc"
-
+	input := "abc,abc,abc"
 	q := NewDefaultQuiz()
-	err := q.Parse(csvFile)
+	err := q.Parse(input)
 
 	if err == nil {
-		t.Errorf("expected error to not be nil, got nil instead")
+		t.Errorf("expected error on Parse(%q), got nil instead", input)
 	}
 }
 
@@ -113,5 +96,27 @@ func TestQuizPlay(t *testing.T) {
 	lastNum := fmt.Sprintf("#%d", len(q.Problems))
 	if !strings.Contains(string(outFileContents), lastNum) {
 		t.Errorf("expected '%s' in output, got '%s'\n", lastNum, string(outFileContents))
+	}
+}
+
+func TestQuizShuffle(t *testing.T) {
+	input := []*Problem{}
+	for i := 0; i < 50; i++ {
+		input = append(input, NewProblem(string(i), "n/a"))
+	}
+
+	q := NewQuiz(input)
+	q.Shuffle()
+	shuffled := false
+
+	for i := 0; i < 50; i++ {
+		if strings.Compare(q.Problems[i].Question, string(i)) != 0 {
+			shuffled = true
+			break
+		}
+	}
+
+	if !shuffled {
+		t.Errorf("Shuffle() of 50 problems were all in the correct order, expected to be shuffled\n")
 	}
 }

@@ -102,23 +102,25 @@ func TestCommandLineParseHasDefaultsForFlags(t *testing.T) {
 	progname := "quiz"
 	args := []string{}
 
-	expectedCsvPath, err := filepathAbs(defaultCsvPath)
+	wantCsvPath, err := filepathAbs(defaultCsvPath)
 	if err != nil {
 		t.Errorf(
 			"could not get absolute path of '%s' because '%s'",
 			defaultCsvPath, err)
 	}
-	expectedTimeLimit := defaultTimeLimit
+	wantTimeLimit := defaultTimeLimit
 
 	cl := NewCommandLine()
 	cl.Parse(progname, args)
+	gotCsvPath := cl.csvPath
+	gotTimeLimit := cl.timeLimit
 
-	if cl.csvPath != expectedCsvPath {
-		t.Errorf("expected csv path %s, got %s", expectedCsvPath, cl.csvPath)
+	if gotCsvPath != wantCsvPath {
+		t.Errorf("expected csv path %s, got %s", wantCsvPath, cl.csvPath)
 	}
 
-	if cl.timeLimit != expectedTimeLimit {
-		t.Errorf("expected time limit %d, got %d", expectedTimeLimit, cl.timeLimit)
+	if gotTimeLimit != wantTimeLimit {
+		t.Errorf("expected time limit %d, got %d", wantTimeLimit, cl.timeLimit)
 	}
 }
 
@@ -165,24 +167,13 @@ func TestCommandLineHasErrOnInvalidParse(t *testing.T) {
 	}
 }
 
-func TestCommandLineShowsHelpPageWithFlag(t *testing.T) {
-	helpErrText := "flag: help requested"
-	csvFlag := "-csv string"
-	limitFlag := "-limit duration"
-
+func TestCommandLineShowsHelpErr(t *testing.T) {
 	cl := NewCommandLine()
-	output, err := cl.Parse("quiz", []string{"-h"})
+	want := "flag: help requested"
+	_, got := cl.Parse("quiz", []string{"-h"})
 
-	if !strings.Contains(err.Error(), helpErrText) {
-		t.Errorf("expected '%s' on -h flag, got '%v'\n", helpErrText, err)
-	}
-
-	if !strings.Contains(output, csvFlag) {
-		t.Errorf("expected '%s', got '%s'", csvFlag, output)
-	}
-
-	if !strings.Contains(output, limitFlag) {
-		t.Errorf("expected '%s', got '%s'", limitFlag, output)
+	if !strings.Contains(got.Error(), want) {
+		t.Errorf("expected '%s' on -h flag, got '%v'\n", want, got)
 	}
 }
 

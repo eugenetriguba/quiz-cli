@@ -8,13 +8,6 @@ type Problem struct {
 	Answer   string
 }
 
-// NewDefaultProblem creates a new Problem type
-// with empty string question and answer.
-func NewDefaultProblem() *Problem {
-	var p Problem
-	return &p
-}
-
 // NewProblem creates a new Problem type with question
 // and answer set using the given arguments.
 func NewProblem(question string, answer string) *Problem {
@@ -26,10 +19,11 @@ func NewProblem(question string, answer string) *Problem {
 	return &p
 }
 
-// IsCorrect checks if the given input is the correct answer.
+// IsCorrect checks if the given input is the correct answer
+// in a case and whitespace insensitive way.
 func (p *Problem) IsCorrect(answer string) bool {
 	answer = strings.TrimSpace(answer)
 	answer = strings.TrimRight(answer, "\n")
 
-	return strings.Compare(p.Answer, answer) == 0
+	return strings.EqualFold(p.Answer, answer)
 }

@@ -5,8 +5,10 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 // Quiz holds all the problems for the quiz we're taking
@@ -64,6 +66,13 @@ func (q *Quiz) Parse(csvFile string) error {
 	}
 
 	return nil
+}
+
+func (q *Quiz) Shuffle() {
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(q.Problems), func(i, j int) {
+		q.Problems[i], q.Problems[j] = q.Problems[j], q.Problems[i]
+	})
 }
 
 // Play starts up the quiz.

@@ -23,6 +23,8 @@ Usage of ./quiz-cli:
         Set problems file (default "/home/eugene/Code/quiz-cli/problems.csv")
   -limit duration
         Set the question time limit (default 30s)
+  -shuffle
+        Shuffle the problems presented
 ```
 
 The `default` for `-csv` is generated automatically based on wherever the `quiz-cli`
