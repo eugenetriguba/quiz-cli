@@ -24,6 +24,11 @@ func TestProblemCanCheckWhetherTheAnswerIsCorrect(t *testing.T) {
 			ExpectedResult: true,
 		},
 		{
+			QuizProblem:    NewProblem("1+1", "2  "),
+			Input:          "2\n",
+			ExpectedResult: true,
+		},
+		{
 			QuizProblem:    NewProblem("What programming language is this?", "GO"),
 			Input:          "go",
 			ExpectedResult: true,

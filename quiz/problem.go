@@ -25,5 +25,5 @@ func (p *Problem) IsCorrect(answer string) bool {
 	answer = strings.TrimSpace(answer)
 	answer = strings.TrimRight(answer, "\n")
 
-	return strings.EqualFold(p.Answer, answer)
+	return strings.EqualFold(strings.TrimSpace(p.Answer), answer)
 }
